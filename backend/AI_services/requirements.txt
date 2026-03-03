@@ -1,0 +1,25 @@
+fastapi
+uvicorn
+pandas
+python-multipart
+joblib
+
+# PDF
+pymupdf
+pdfplumber
+pdf2image
+pytesseract
+pillow
+
+# AI / NLP
+sentence-transformers
+scikit-learn
+numpy
+torch
+
+# Audio / Video
+openai-whisper
+ffmpeg-python
+moviepy
+easyocr
+opencv-python
