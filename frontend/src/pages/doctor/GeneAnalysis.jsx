@@ -183,7 +183,18 @@ Prenatal AI Team
             setChecklist({});
         }, 200);
     };
+const resetAnalysisState = () => {
+  setFile(null);
+  setAudioBlob(null);
+  setSubmittedText("");
+  setVoiceText("");
 
+  setAnalysisStarted(false);
+  setPp4Calculated(false);
+  setPp4Result(null);
+  setGeneData(null);
+  setBackendChecklist([]);
+};
 
 
 const handleCalculate = async () => {
@@ -492,14 +503,15 @@ await API.put(`/cases/${selectedCase}/status`, {
 });
 
     // 🚨 STOP if gene not detected
-    if (
-      !result?.genetic?.gene ||
-      result.genetic.gene === "UNKNOWN" ||
-      result.warning
-    ) {
-      alert(result.warning || "Gene not detected in report.");
-      return; // ⛔ STOP HERE
-    }
+   if (
+  !result?.genetic?.gene ||
+  result.genetic.gene === "UNKNOWN" ||
+  result.warning
+) {
+  alert(result.warning || "Gene not detected in report.");
+  setAnalysisLoading(false);
+  return;
+}
 
     // Save gene + variant
     setGeneData(result.genetic);
@@ -524,7 +536,7 @@ setGeneData(prev => ({
 }));
 
     setAnalysisStarted(true);
-    setAnalysisLoading(false);
+    // setAnalysisLoading(false);
 
     alert("Analysis started successfully!");
 
@@ -535,6 +547,8 @@ setGeneData(prev => ({
       error.response?.data?.message ||
       "Upload failed. Please try again."
     );
+
+      setAnalysisLoading(false);
   }
 };
 
@@ -608,7 +622,7 @@ setGeneData(prev => ({
                 uploadMode === "voice" ? "voice-active" : ""
               }`}
             >
-              <button
+              {/* <button
                 className={uploadMode === "file" ? "active" : ""}
                 onClick={() => setUploadMode("file")}
               >
@@ -620,7 +634,28 @@ setGeneData(prev => ({
                 onClick={() => setUploadMode("voice")}
               >
                 Voice Assistant
-              </button>
+              </button> */}
+<button
+  className={uploadMode === "file" ? "active" : ""}
+  onClick={() => {
+    resetAnalysisState();
+    setUploadMode("file");
+  }}
+>
+  File Upload
+</button>
+
+<button
+  className={uploadMode === "voice" ? "active" : ""}
+  onClick={() => {
+    resetAnalysisState();
+    setUploadMode("voice");
+  }}
+>
+  Voice Assistant
+</button>
+
+
             </div>
 
 
@@ -775,11 +810,13 @@ setGeneData(prev => ({
                 <div className="analysis-action">
                     <button
   className="start-btn"
-  onClick={async () => {
-    await handleUploadToBackend();
-    setAnalysisStarted(true);
-    setPp4Calculated(false);
-  }}
+  // onClick={async () => {
+  //   await handleUploadToBackend();
+  //   setAnalysisStarted(true);
+  //   setPp4Calculated(false);
+  // }}
+   
+  onClick={handleUploadToBackend}
 >
   <UploadCloud size={18} />
   Start Analysis

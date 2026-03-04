@@ -75,7 +75,7 @@ export default function Sidebar({ collapsed, toggle }) {
         <NavLink to="/chat-bot">
           <Bot />
 
-          {!collapsed && <span>Copoilet</span>}
+          {!collapsed && <span>Copilot</span>}
         </NavLink>
 
       </nav>

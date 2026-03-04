@@ -302,32 +302,47 @@ if (!isRelated && !file && !audioBlob) {
 
     // Fetch checklist
     const checklistRes = await API.post("/checklist", {
-      gene,
-      conversationId: currentChatId
-    });
+  gene,
+  conversationId: currentChatId
+});
 
-    setMessages(prev => [
-      ...prev,
-      {
-        sender: "ai",
-        type: "checklist",
-        checklistData: checklistRes.data.data.checklist,
-        gene
-      }
-    ]);
+if (!checklistRes.data.success) {
+  setMessages(prev => [
+    ...prev,
+    {
+      sender: "ai",
+      text: checklistRes.data.message
+    }
+  ]);
+  return;
+}
+
+setMessages(prev => [
+  ...prev,
+  {
+    sender: "ai",
+    type: "checklist",
+    checklistData: checklistRes.data.data.checklist,
+    gene
+  }
+]);
 
   } catch (error) {
 
-    setMessages(prev => prev.filter(msg => msg.type !== "loading"));
+  setMessages(prev => prev.filter(msg => msg.type !== "loading"));
 
-    setMessages(prev => [
-      ...prev,
-      {
-        sender: "ai",
-        text: "AI processing failed. Please try again."
-      }
-    ]);
-  }
+  const errorMessage =
+    error.response?.data?.message ||
+    "Gene not detected in dataset.";
+
+  setMessages(prev => [
+    ...prev,
+    {
+      sender: "ai",
+      text: errorMessage
+    }
+  ]);
+}
 
   setIsAnalyzing(false);
   setInput("");

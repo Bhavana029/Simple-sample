@@ -68,6 +68,13 @@ exports.handleChat = async (req, res) => {
         text,
         gestation
       );
+      if (!result?.genetic?.gene) {
+    return res.status(200).json({
+      success: false,
+      message: "Gene not detected in dataset"
+    });
+  }
+
 
       // Save doctor message
       await Message.create({
@@ -133,7 +140,31 @@ exports.generateChecklist = async (req, res) => {
       });
     }
 
-    const result = await aiService.generateChecklist(gene);
+    // const result = await aiService.generateChecklist(gene);
+
+    let result;
+
+try {
+  result = await aiService.generateChecklist(gene);
+} catch (aiError) {
+
+  console.error(
+    "FastAPI Checklist Error:",
+    aiError.response?.data || aiError.message
+  );
+
+  return res.status(200).json({
+    success: false,
+    message: "Checklist not available for this gene."
+  });
+}
+
+if (!result || Object.keys(result).length === 0) {
+  return res.status(200).json({
+    success: false,
+    message: "Checklist data not found for this gene."
+  });
+}
 
     // 🔥 SAVE CHECKLIST MESSAGE IN DB
     await Message.create({
@@ -149,12 +180,12 @@ exports.generateChecklist = async (req, res) => {
     });
 
   } catch (error) {
-    console.error("Checklist Error:", error.message);
+    console.error("Checklist Controller Error:", error);
 
-    return res.status(500).json({
-      success: false,
-      message: error.message
-    });
+return res.status(500).json({
+  success: false,
+  message: "Checklist generation failed."
+});
   }
 };
 
@@ -228,19 +259,20 @@ exports.createConversation = async (req, res) => {
     const doctorId = req.user.id;
 
     // Count existing conversations of this doctor
-const lastConversation = await Conversation.findOne({ doctorId })
-  .sort({ createdAt: -1 });
+    // 
+   const conversations = await Conversation.find({ doctorId });
 
-let nextNumber = 1;
+let maxNumber = 0;
 
-if (lastConversation) {
-  const lastNumber = parseInt(
-    lastConversation.title.split("-")[1]
-  );
-  nextNumber = lastNumber + 1;
-}
+conversations.forEach(conv => {
+  const match = conv.title.match(/Conversation-(\d+)/);
+  if (match) {
+    const num = parseInt(match[1]);
+    if (num > maxNumber) maxNumber = num;
+  }
+});
 
-const title = `Conversation-${nextNumber}`;
+const title = `Conversation-${maxNumber + 1}`;
 
 // Generate title like Conversation-1, 2, 3
 

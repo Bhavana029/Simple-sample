@@ -237,12 +237,12 @@ const getActionClass = (action) => {
                 className="activity-card"
                 onClick={() => {
                   if (item.action !== "DELETED") {
-                    navigate("/cases", {
-                      state: {
-                        highlightId: item.mongoCaseId,
-                        action: item.action
-                      }
-                    });
+                    // navigate("/cases", {
+                    //   state: {
+                    //     highlightId: item.mongoCaseId,
+                    //     action: item.action
+                    //   }
+                    // });
                   }
                 }}
               >
